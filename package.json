@@ -1,0 +1,8 @@
+{
+  "name": "scorekeep-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com-naismith:Naismith/scorekeep-app.git",
+  "author": "Chris Naismith <cnaismith@hopper.com>",
+  "license": "MIT"
+}
