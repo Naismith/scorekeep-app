@@ -8,6 +8,7 @@ import HomePage from "./pages/Home";
 import PlayersPage from "./pages/Players";
 import GamesPage from "./pages/Games";
 import CreateGame from "./pages/CreateGame";
+import GameDetails from "./pages/GameDetails";
 
 const queryClient = new QueryClient();
 const theme = createTheme({ palette: { mode: "dark" } });
@@ -20,6 +21,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
+            <Route path="/game/:id" element={<GameDetails />} />
             <Route path="/new-game" element={<CreateGame />} />
             <Route path="/games" element={<GamesPage />} />
             <Route path="/players" element={<PlayersPage />} />

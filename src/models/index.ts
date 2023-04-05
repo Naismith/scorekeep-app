@@ -1,4 +1,4 @@
-export type Score = Number[];
+export type Score = (number | null)[];
 
 export type Player = {
   id: string;
