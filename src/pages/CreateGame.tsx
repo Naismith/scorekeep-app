@@ -24,6 +24,9 @@ import { usePlayersQuery } from "../hooks/usePlayers";
 import { Player } from "../models";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useCreateGameMutation } from "../hooks/useGames";
+import AddIcon from "@mui/icons-material/Add";
+import { NewPlayerModal } from "../components/NewPlayerModal";
+
 enum StepEnum {
   Create = 0,
   Players = 1,
@@ -35,10 +38,23 @@ const toolbarSubText: Record<StepEnum, string> = {
 };
 const CreateGame = () => {
   const navigate = useNavigate();
-  const { data, isLoading, isSuccess } = usePlayersQuery();
+  const { data: players, isLoading, isSuccess } = usePlayersQuery();
   const [activeStep, setActiveStep] = useState(StepEnum.Create);
   const [selectedPlayers, setSelectedPlayers] = useState([] as Player[]);
   const { mutateAsync } = useCreateGameMutation();
+  const [reversedScoring, setReversedScoring] = useState(false);
+  const [showInterm, setShowInterm] = useState(true);
+  const [showRounds, setShowRounds] = useState(true);
+  const [gameTitle, setGameTitle] = useState("");
+  const [maxScore, setMaxScore] = useState("");
+  const [maxRounds, setMaxRounds] = useState("");
+  const [showNewPlayer, setShowNewPlayer] = useState(false);
+
+  const selectedPlayerIds = selectedPlayers.map((player) => player.id);
+
+  const nonSelectedPlayers = (players || []).filter(
+    (player) => !selectedPlayerIds.includes(player.id)
+  );
 
   const isStep = (step: StepEnum) => step === activeStep;
 
@@ -57,11 +73,20 @@ const CreateGame = () => {
       justifyContent="center"
     >
       <Container maxWidth="xs">
-        <TextField fullWidth label="Game title" required sx={{ mb: 2 }} />
+        <TextField
+          fullWidth
+          label="Game title"
+          value={gameTitle}
+          onChange={(e) => setGameTitle(e.target.value)}
+          required
+          sx={{ mb: 2 }}
+        />
         <TextField
           fullWidth
           label="Max score (optional)"
           type="number"
+          value={maxScore}
+          onChange={(e) => setMaxScore(e.target.value)}
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           sx={{ mb: 2 }}
         />
@@ -69,27 +94,44 @@ const CreateGame = () => {
           fullWidth
           label="Count of game rounds (optional)"
           type="number"
+          value={maxRounds}
+          onChange={(e) => setMaxRounds(e.target.value)}
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           sx={{ mb: 2 }}
         />
         <FormControlLabel
           label="Reversed Scoring"
           labelPlacement="start"
-          control={<Switch />}
+          control={
+            <Switch
+              checked={reversedScoring}
+              onChange={(e) => setReversedScoring(e.target.checked)}
+            />
+          }
           sx={{ width: "100%", justifyContent: "space-between", mb: 2 }}
         />
 
         <FormControlLabel
           label="Show interim results"
           labelPlacement="start"
-          control={<Switch defaultChecked />}
+          control={
+            <Switch
+              checked={showInterm}
+              onChange={(e) => setShowInterm(e.target.checked)}
+            />
+          }
           sx={{ width: "100%", justifyContent: "space-between", mb: 2 }}
         />
 
         <FormControlLabel
           label="Show game rounds"
           labelPlacement="start"
-          control={<Switch defaultChecked />}
+          control={
+            <Switch
+              checked={showRounds}
+              onChange={(e) => setShowRounds(e.target.checked)}
+            />
+          }
           sx={{ width: "100%", justifyContent: "space-between", mb: 2 }}
         />
       </Container>
@@ -97,74 +139,82 @@ const CreateGame = () => {
   );
 
   const PlayersSelect = (
-    <Container
-      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
-      maxWidth="xs"
-    >
-      {selectedPlayers.length === 0 ? (
-        <Box
-          flexGrow={1}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          Select players for this game
-        </Box>
-      ) : (
-        <Box flexGrow={1}>
-          <List>
-            {selectedPlayers.map((player) => (
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: player.color }}> </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={player.name} />
-                <IconButton onClick={() => deletePlayer(player)}>
-                  <DeleteIcon sx={{ color: "#ccc" }} />
-                </IconButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      )}
-
-      <Box maxHeight="300px" flexWrap="wrap" display="flex">
-        <Box
-          width="calc(100% / 3)"
-          textAlign="center"
-          height="35px"
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "black",
-          }}
-        >
-          New player
-        </Box>
-        {(data || []).map((player) => (
+    <>
+      <NewPlayerModal
+        open={showNewPlayer}
+        handleClose={() => setShowNewPlayer(false)}
+      />
+      <Container
+        sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+        maxWidth="xs"
+      >
+        {selectedPlayers.length === 0 ? (
           <Box
-            key={player.id}
+            flexGrow={1}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            Select players for this game
+          </Box>
+        ) : (
+          <Box flexGrow={1}>
+            <List>
+              {selectedPlayers.map((player) => (
+                <ListItem>
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: player.color }}> </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary={player.name} />
+                  <IconButton onClick={() => deletePlayer(player)}>
+                    <DeleteIcon sx={{ color: "#ccc" }} />
+                  </IconButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        )}
+
+        <Box maxHeight="300px" flexWrap="wrap" display="flex">
+          <Box
             width="calc(100% / 3)"
             textAlign="center"
             height="35px"
-            onClick={() => addPlayer(player)}
+            onClick={() => setShowNewPlayer(true)}
             sx={{
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              bgcolor: player.color,
-              color:
-                getContrastRatio("#ffffff", player.color) >= 3
-                  ? "#fff"
-                  : "#000",
+              bgcolor: "black",
             }}
           >
-            {player.name}
+            <AddIcon sx={{ fontSize: "1.5em", color: "#1EC73B", mr: 1 }} />
+            New player
           </Box>
-        ))}
-      </Box>
-    </Container>
+          {(nonSelectedPlayers || []).map((player) => (
+            <Box
+              key={player.id}
+              width="calc(100% / 3)"
+              textAlign="center"
+              height="35px"
+              onClick={() => addPlayer(player)}
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: player.color,
+                color:
+                  getContrastRatio("#ffffff", player.color) >= 3
+                    ? "#fff"
+                    : "#000",
+              }}
+            >
+              {player.name}
+            </Box>
+          ))}
+        </Box>
+      </Container>
+    </>
   );
 
   const TopBar = (
@@ -192,9 +242,9 @@ const CreateGame = () => {
             if (isStep(StepEnum.Players)) {
               const newGame = await mutateAsync({
                 title: "",
-                reversedScoring: true,
-                showGameResults: true,
-                showInterimResults: true,
+                reversedScoring: reversedScoring,
+                showGameResults: showRounds,
+                showInterimResults: showInterm,
                 players: selectedPlayers,
               });
               setSelectedPlayers([]);

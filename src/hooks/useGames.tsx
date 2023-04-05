@@ -16,6 +16,7 @@ let games: Game[] = [
     showGameResults: true,
     id: "abc",
     title: "Example",
+    status: "in-progress",
     scores: [[null, null, null, null]],
     players: [
       {
@@ -55,18 +56,23 @@ export const useGamesQuery = () => {
 };
 
 export const useGameByIdQuery = (id: string, options?: UseQueryOptions) => {
+  const game = games.find((game) => game.id === id);
+
   return useQuery({
     queryKey: ["useGameById", id],
-    queryFn: () => Promise.resolve(games[0]),
+    queryFn: () => Promise.resolve(game),
   });
 };
 
 export const useUpdateRowMutation = (id: string) => {
   const queryClient = useQueryClient();
+  const gameIndex = games.findIndex((game) => game.id === id);
 
   return useMutation({
     mutationFn: ({ rowIndex, row }: { rowIndex: number; row: Score }) => {
-      games[0].scores[rowIndex] = row;
+      if (gameIndex >= 0) {
+        games[gameIndex].scores[rowIndex] = row;
+      }
 
       queryClient.invalidateQueries({ queryKey: ["useGameById", id] });
 
@@ -81,13 +87,15 @@ export const useCreateNewRowMutation = (
 ) => {
   const [lastSuccess, setLastSuccess] = useState(0);
   const queryClient = useQueryClient();
+  const gameIndex = games.findIndex((game) => game.id === id);
 
   const result = useMutation({
     mutationFn: () => {
-      games[0].scores.push(games[0].players.map(() => null));
+      if (gameIndex >= 0) {
+        games[gameIndex].scores.push(games[gameIndex].players.map(() => null));
 
-      queryClient.invalidateQueries({ queryKey: ["useGameById", id] });
-
+        queryClient.invalidateQueries({ queryKey: ["useGameById", id] });
+      }
       return Promise.resolve();
     },
     ...options,
@@ -108,10 +116,12 @@ export const useCreateGameMutation = () => {
   return useMutation({
     mutationFn: (partialGame: NewGame) => {
       const now = new Date();
+      console.log(partialGame);
       const newGame: Game = {
         ...partialGame,
         id: uuid(),
-        scores: [],
+        status: "in-progress",
+        scores: [partialGame.players.map(() => null)],
         createdAt: now,
         updatedAt: now,
       };

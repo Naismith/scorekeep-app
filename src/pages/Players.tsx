@@ -1,19 +1,18 @@
 import { usePlayersQuery } from "../hooks/usePlayers";
-import type { Player } from "../models";
 import {
   AppBar,
-  Button,
-  Box,
-  Container,
   Toolbar,
   IconButton,
   Typography,
-  Drawer,
+  Container,
+  Stack,
+  Box,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddCircle from "@mui/icons-material/AddCircle";
 import { NewPlayerModal } from "../components/NewPlayerModal";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const PlayersPage = () => {
   const { data, isSuccess } = usePlayersQuery();
@@ -27,16 +26,17 @@ const PlayersPage = () => {
       <AppBar position="sticky">
         <Toolbar>
           <IconButton
+            component={Link}
+            to="/"
             edge="start"
             color="inherit"
             aria-label="menu"
             sx={{ mr: 2 }}
-            onClick={() => {}}
           >
-            <MenuIcon />
+            <ArrowBackIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Score Keeper
+            Player List
           </Typography>
           <IconButton
             edge="start"
@@ -49,28 +49,29 @@ const PlayersPage = () => {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <h1>Players</h1>
-      <ul>
-        {isSuccess &&
-          data.map((player) => (
-            <li
-              key={player.id}
-              style={{ display: "flex", alignItems: "center" }}
-            >
-              <span
-                style={{
-                  display: "block",
-                  borderRadius: "50%",
-                  height: "1em",
-                  width: "1em",
-                  marginRight: "1em",
-                  backgroundColor: player.color,
-                }}
-              />
-              <h3 style={{ margin: 0 }}>{player.name}</h3>
-            </li>
-          ))}
-      </ul>
+      <Container maxWidth="xs">
+        <Stack spacing={2}>
+          {isSuccess &&
+            data.map((player) => (
+              <Box
+                key={player.id}
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <span
+                  style={{
+                    display: "block",
+                    borderRadius: "50%",
+                    height: "1em",
+                    width: "1em",
+                    marginRight: "1em",
+                    backgroundColor: player.color,
+                  }}
+                />
+                <h3 style={{ margin: 0 }}>{player.name}</h3>
+              </Box>
+            ))}
+        </Stack>
+      </Container>
     </>
   );
 };

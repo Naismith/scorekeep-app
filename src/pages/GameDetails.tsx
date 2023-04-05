@@ -1,5 +1,15 @@
-import { Box, Container, getContrastRatio, styled } from "@mui/material";
-import { useParams } from "react-router-dom";
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  Toolbar,
+  Typography,
+  getContrastRatio,
+  styled,
+} from "@mui/material";
+import { Link, useParams } from "react-router-dom";
 import {
   useCreateNewRowMutation,
   useGameByIdQuery,
@@ -7,6 +17,8 @@ import {
 } from "../hooks/useGames";
 import { Score } from "../models";
 import { useEffect, useRef } from "react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 const TableHeader = styled("span")<{ backgroundColor?: string }>((props) => ({
   textAlign: "center",
@@ -112,9 +124,11 @@ const GameDetails = () => {
     }
   }, [lastSuccess]);
 
-  if (!isSuccess) {
+  if (!isSuccess || !data) {
     return null;
   }
+
+  console.log(data);
 
   const totals = data.scores.reduce((acc, row) => {
     row.forEach(
@@ -125,6 +139,43 @@ const GameDetails = () => {
 
   return (
     <>
+      <AppBar position="sticky">
+        <Toolbar>
+          <IconButton
+            component={Link}
+            to="/"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" noWrap>
+              {data.title}
+            </Typography>
+          </Box>
+          <Button
+            sx={{ color: "white" }}
+            onClick={() => console.log("finish game")}
+            variant="text"
+          >
+            finish game
+          </Button>
+          <IconButton
+            onClick={async () => {
+              console.log("click");
+            }}
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ ml: 0 }}
+          >
+            <MoreVertIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
       <Container
         maxWidth="xs"
         sx={{
@@ -166,19 +217,20 @@ const GameDetails = () => {
 
           <Box flexGrow={1} />
 
-          <Grid
-            columns={data.players.length}
-            rows={1}
-            sx={{
-              borderTop: "2px solid red",
-              position: "sticky",
-              bottom: 0,
-            }}
-          >
-            <SummaryRow totals={totals} />
-          </Grid>
+          {data.showInterimResults && (
+            <Grid
+              columns={data.players.length}
+              rows={1}
+              sx={{
+                borderTop: "2px solid red",
+                position: "sticky",
+                bottom: 0,
+              }}
+            >
+              <SummaryRow totals={totals} />
+            </Grid>
+          )}
         </Box>
-        {/* <pre>{JSON.stringify(data, null, 4)}</pre> */}
       </Container>
     </>
   );

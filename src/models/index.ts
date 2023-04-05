@@ -20,6 +20,10 @@ export type Game = {
   scores: Score[];
   createdAt: Date;
   updatedAt: Date;
+  status: "in-progress" | "finished";
 };
 
-export type NewGame = Omit<Game, "id" | "scores" | "createdAt" | "updatedAt">;
+export type NewGame = Omit<
+  Game,
+  "id" | "scores" | "createdAt" | "updatedAt" | "status"
+>;
