@@ -13,6 +13,16 @@ let players: Player[] = [
     name: "Rebecca",
     color: "#a0c8e4",
   },
+  {
+    id: "6ddfe49c-ba13-431b-8b72-5765ae641a45",
+    name: "John",
+    color: "#58B09C",
+  },
+  {
+    id: "b4d06a22-cde3-4a57-9194-96765127e2a5",
+    name: "Julia",
+    color: "#7D82B8",
+  },
 ];
 
 export let getPlayers = Promise.resolve(players);

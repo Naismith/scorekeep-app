@@ -4,22 +4,34 @@ import {
   Container,
   Grid,
   IconButton,
-  List,
   ListItem,
   Stack,
   Toolbar,
   Typography,
   Menu,
   MenuItem,
+  Paper,
+  Divider,
+  Card,
+  CardContent,
 } from "@mui/material";
 import { useGamesQuery } from "../hooks/useGames";
-import { usePlayersQuery } from "../hooks/usePlayers";
 import { Link, useNavigate } from "react-router-dom";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { GameStatus } from "../models";
+import React from "react";
 
 const PlayersPage = () => {
+  const [filter, setFilter] = useState<GameStatus | null>(null);
+  const { data: games } = useGamesQuery({
+    select: (data) => {
+      if (!filter) return data;
+
+      return data.filter((g) => g.status === filter);
+    },
+  });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -29,8 +41,7 @@ const PlayersPage = () => {
     setAnchorEl(null);
   };
   const navigate = useNavigate();
-  const { data, isSuccess } = usePlayersQuery();
-  const { data: games } = useGamesQuery();
+
   return (
     <>
       <AppBar position="sticky">
@@ -59,33 +70,28 @@ const PlayersPage = () => {
             <FilterListIcon />
           </IconButton>
           <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-            <MenuItem>All games</MenuItem>
-            <MenuItem>In progress games</MenuItem>
-            <MenuItem>Finished games</MenuItem>
+            <MenuItem onClick={() => setFilter(null)}>All games</MenuItem>
+            <MenuItem onClick={() => setFilter("in-progress")}>
+              In progress games
+            </MenuItem>
+            <MenuItem onClick={() => setFilter("finished")}>
+              Finished games
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
       <Container maxWidth="xs">
         <Stack spacing={2}>
-          {(games || []).map((game) => (
-            <ListItem
-              onClick={() => navigate(`/game/${game.id}`)}
-              key={game.id}
-            >
-              <Grid container>
-                <Grid item xs={8}>
-                  {game.title}
-                </Grid>
-                <Grid item xs={4}>
-                  Created at{" "}
-                  {game.createdAt.toLocaleTimeString("en-us", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </Grid>
-              </Grid>
-            </ListItem>
+          {(games || []).map((game, i) => (
+            <React.Fragment key={game.id}>
+              {i !== 0 && <Divider />}
+              <Card onClick={() => navigate(`/game/${game.id}`)}>
+                <CardContent>
+                  <Typography>{game.title}</Typography>
+                  <Typography>Created on: </Typography>
+                </CardContent>
+              </Card>
+            </React.Fragment>
           ))}
         </Stack>
       </Container>

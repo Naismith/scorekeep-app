@@ -1,7 +1,4 @@
 import {
-  Box,
-  Modal,
-  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -10,30 +7,30 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNewPlayerMutation } from "../hooks/usePlayers";
 
 const colorOptions = [
-  "#d3d3d3",
   "#2f4f4f",
   "#2e8b57",
-  "#7f0000",
+  "#800000",
   "#808000",
-  "#000080",
-  "#ff0000",
-  "#00ced1",
-  "#ff8c00",
-  "#ffd700",
-  "#7cfc00",
-  "#ba55d3",
+  "#00008b",
+  "#ff4500",
+  "#ffa500",
+  "#7fff00",
   "#00fa9a",
+  "#4169e1",
+  "#00ffff",
+  "#00bfff",
   "#0000ff",
-  "#f08080",
+  "#d8bfd8",
   "#ff00ff",
-  "#1e90ff",
-  "#f0e68c",
-  "#dda0dd",
+  "#fa8072",
+  "#eee8aa",
+  "#ffff54",
   "#ff1493",
+  "#ee82ee",
 ];
 
 type Props = {

@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import {
   AppBar,
   Button,
-  Box,
   Container,
   Toolbar,
   IconButton,
@@ -39,7 +38,15 @@ const Home = () => {
       >
         test
       </Drawer>
-      <Container maxWidth="xs">
+      <Container
+        maxWidth="xs"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          flexDirection: "column",
+          height: "100%",
+        }}
+      >
         <Button
           component={Link}
           to="/new-game"

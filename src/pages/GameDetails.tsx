@@ -12,13 +12,15 @@ import {
 import { Link, useParams } from "react-router-dom";
 import {
   useCreateNewRowMutation,
+  useFinishGameMutation,
   useGameByIdQuery,
   useUpdateRowMutation,
 } from "../hooks/useGames";
 import { Score } from "../models";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { GameResultsModal } from "../components/GameResultsModal";
 
 const TableHeader = styled("span")<{ backgroundColor?: string }>((props) => ({
   textAlign: "center",
@@ -47,7 +49,9 @@ const ScoreRow = ({
   onLastKeyDown,
   firstRef,
   onUpdate,
+  readOnly,
 }: {
+  readOnly: boolean;
   onUpdate: (row: Score) => void;
   rowIndex: number | null;
   scores: Score;
@@ -60,6 +64,7 @@ const ScoreRow = ({
       {scores.map((score, i) => (
         <Box
           key={i}
+          readOnly={readOnly}
           ref={i === 0 ? firstRef : undefined}
           component="input"
           sx={{
@@ -110,11 +115,18 @@ const Grid = styled("div")<{ columns: number; rows: number }>((props) => ({
 
 const GameDetails = () => {
   const { id = "" } = useParams();
+  const [showResultsModal, setShowResultsModal] = useState(false);
   const { data, isSuccess } = useGameByIdQuery(id);
   const lastRowFirstCellRef = useRef<HTMLInputElement>(null);
   const { mutateAsync: createRow, lastSuccess } = useCreateNewRowMutation(id);
   const { mutateAsync: updateRow } = useUpdateRowMutation(id);
+  const { mutateAsync: finishGame } = useFinishGameMutation(id);
 
+  useEffect(() => {
+    if (data?.status === "finished") {
+      setShowResultsModal(true);
+    }
+  }, [data?.status]);
   useEffect(() => {
     const firstElement = lastRowFirstCellRef.current;
 
@@ -128,17 +140,41 @@ const GameDetails = () => {
     return null;
   }
 
-  console.log(data);
-
-  const totals = data.scores.reduce((acc, row) => {
-    row.forEach(
-      (score, index) => (acc[index] = (acc[index] || 0) + (score || 0))
-    );
+  const totals = data.scores.reduce((acc: number[], row) => {
+    row.forEach((score, index) => {
+      acc[index] = (acc[index] || 0) + (score || 0);
+    });
     return acc;
   }, [] as number[]);
 
+  const handleNewRowCreation = async (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key !== "Tab") return;
+
+    const currentRounds = data.scores.length;
+
+    const maxScore = data.maxScore;
+    const maxRoundsReached = data.countOfGameRounds === currentRounds;
+    const maxScoreReached =
+      maxScore !== undefined && totals.some((score) => score < maxScore);
+
+    if (maxRoundsReached || maxScoreReached) {
+      await finishGame();
+      return;
+    }
+
+    e.preventDefault();
+    await createRow();
+  };
+
   return (
     <>
+      <GameResultsModal
+        open={showResultsModal}
+        onClose={() => setShowResultsModal(false)}
+        game={data}
+      />
       <AppBar position="sticky">
         <Toolbar>
           <IconButton
@@ -156,13 +192,24 @@ const GameDetails = () => {
               {data.title}
             </Typography>
           </Box>
-          <Button
-            sx={{ color: "white" }}
-            onClick={() => console.log("finish game")}
-            variant="text"
-          >
-            finish game
-          </Button>
+          {data.status === "finished" && (
+            <Button
+              sx={{ color: "white" }}
+              onClick={() => setShowResultsModal(true)}
+              variant="text"
+            >
+              Results
+            </Button>
+          )}
+          {data.status === "in-progress" && (
+            <Button
+              sx={{ color: "white" }}
+              onClick={() => finishGame()}
+              variant="text"
+            >
+              finish game
+            </Button>
+          )}
           <IconButton
             onClick={async () => {
               console.log("click");
@@ -201,13 +248,13 @@ const GameDetails = () => {
             {data.scores.map((scores, i) => (
               <ScoreRow
                 key={i}
+                readOnly={data.status === "finished"}
                 firstRef={lastRowFirstCellRef}
-                onLastKeyDown={async (e) => {
-                  if (i + 1 === data.scores.length && e.key === "Tab") {
-                    e.preventDefault();
-                    await createRow();
-                  }
-                }}
+                onLastKeyDown={
+                  i + 1 === data.scores.length
+                    ? handleNewRowCreation
+                    : undefined
+                }
                 onUpdate={(row) => updateRow({ rowIndex: i, row })}
                 rowIndex={i + 1}
                 scores={scores}

@@ -17,7 +17,6 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CheckIcon from "@mui/icons-material/Check";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Link, useNavigate } from "react-router-dom";
 import { usePlayersQuery } from "../hooks/usePlayers";
@@ -26,6 +25,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useCreateGameMutation } from "../hooks/useGames";
 import AddIcon from "@mui/icons-material/Add";
 import { NewPlayerModal } from "../components/NewPlayerModal";
+import { useForm } from "react-hook-form";
 
 enum StepEnum {
   Create = 0,
@@ -36,18 +36,25 @@ const toolbarSubText: Record<StepEnum, string> = {
   [StepEnum.Create]: "Please enter game parameters",
   [StepEnum.Players]: "Select players for this game",
 };
+
+type FormData = {
+  title: string;
+  maxScore: string;
+  countOfGameRounds: string;
+  showGameRounds: boolean;
+  showInterimResults: boolean;
+  reversedScoring: boolean;
+};
+
 const CreateGame = () => {
   const navigate = useNavigate();
+  const { register, getValues, watch } = useForm<FormData>({});
   const { data: players, isLoading, isSuccess } = usePlayersQuery();
   const [activeStep, setActiveStep] = useState(StepEnum.Create);
   const [selectedPlayers, setSelectedPlayers] = useState([] as Player[]);
   const { mutateAsync } = useCreateGameMutation();
-  const [reversedScoring, setReversedScoring] = useState(false);
-  const [showInterm, setShowInterm] = useState(true);
-  const [showRounds, setShowRounds] = useState(true);
-  const [gameTitle, setGameTitle] = useState("");
-  const [maxScore, setMaxScore] = useState("");
-  const [maxRounds, setMaxRounds] = useState("");
+
+  // console.log(watch());
   const [showNewPlayer, setShowNewPlayer] = useState(false);
 
   const selectedPlayerIds = selectedPlayers.map((player) => player.id);
@@ -66,27 +73,20 @@ const CreateGame = () => {
     setSelectedPlayers((p) => p.filter((p) => p !== player));
 
   const CreateStep = (
-    <Box
-      display="flex"
-      height="100%"
-      alignItems="center"
-      justifyContent="center"
-    >
+    <>
       <Container maxWidth="xs">
         <TextField
           fullWidth
           label="Game title"
-          value={gameTitle}
-          onChange={(e) => setGameTitle(e.target.value)}
           required
+          {...register("title", { required: true })}
           sx={{ mb: 2 }}
         />
         <TextField
           fullWidth
           label="Max score (optional)"
           type="number"
-          value={maxScore}
-          onChange={(e) => setMaxScore(e.target.value)}
+          {...register("maxScore")}
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           sx={{ mb: 2 }}
         />
@@ -94,8 +94,7 @@ const CreateGame = () => {
           fullWidth
           label="Count of game rounds (optional)"
           type="number"
-          value={maxRounds}
-          onChange={(e) => setMaxRounds(e.target.value)}
+          {...register("countOfGameRounds")}
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           sx={{ mb: 2 }}
         />
@@ -103,10 +102,7 @@ const CreateGame = () => {
           label="Reversed Scoring"
           labelPlacement="start"
           control={
-            <Switch
-              checked={reversedScoring}
-              onChange={(e) => setReversedScoring(e.target.checked)}
-            />
+            <Switch defaultChecked={false} {...register("reversedScoring")} />
           }
           sx={{ width: "100%", justifyContent: "space-between", mb: 2 }}
         />
@@ -115,10 +111,7 @@ const CreateGame = () => {
           label="Show interim results"
           labelPlacement="start"
           control={
-            <Switch
-              checked={showInterm}
-              onChange={(e) => setShowInterm(e.target.checked)}
-            />
+            <Switch defaultChecked={true} {...register("showInterimResults")} />
           }
           sx={{ width: "100%", justifyContent: "space-between", mb: 2 }}
         />
@@ -127,15 +120,12 @@ const CreateGame = () => {
           label="Show game rounds"
           labelPlacement="start"
           control={
-            <Switch
-              checked={showRounds}
-              onChange={(e) => setShowRounds(e.target.checked)}
-            />
+            <Switch defaultChecked={true} {...register("showGameRounds")} />
           }
           sx={{ width: "100%", justifyContent: "space-between", mb: 2 }}
         />
       </Container>
-    </Box>
+    </>
   );
 
   const PlayersSelect = (
@@ -240,11 +230,16 @@ const CreateGame = () => {
           onClick={async () => {
             if (isStep(StepEnum.Create)) setActiveStep(StepEnum.Players);
             if (isStep(StepEnum.Players)) {
+              const values = getValues();
               const newGame = await mutateAsync({
-                title: "",
-                reversedScoring: reversedScoring,
-                showGameResults: showRounds,
-                showInterimResults: showInterm,
+                title: values.title,
+                reversedScoring: values.reversedScoring,
+                showGameRounds: values.showGameRounds,
+                showInterimResults: values.showInterimResults,
+                countOfGameRounds:
+                  Number(values.countOfGameRounds) || undefined,
+                maxScore: Number(values.maxScore) || undefined,
+
                 players: selectedPlayers,
               });
               setSelectedPlayers([]);
@@ -283,8 +278,15 @@ const CreateGame = () => {
   return (
     <>
       {TopBar}
-      {isStep(StepEnum.Create) && CreateStep}
-      {isStep(StepEnum.Players) && PlayersSelect}
+      <Box
+        display="flex"
+        height="100%"
+        alignItems="center"
+        justifyContent="center"
+      >
+        {isStep(StepEnum.Create) && CreateStep}
+        {isStep(StepEnum.Players) && PlayersSelect}
+      </Box>
     </>
   );
 };

@@ -1,6 +1,8 @@
-import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 
 import { GlobalStylesOverrides } from "./components/GlobalOverrides";
 

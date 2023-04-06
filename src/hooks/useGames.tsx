@@ -9,49 +9,85 @@ import { NewGame, Game, Score } from "../models";
 import { v4 as uuid } from "uuid";
 import { useState } from "react";
 
-let games: Game[] = [
-  {
-    reversedScoring: true,
-    showInterimResults: true,
-    showGameResults: true,
-    id: "abc",
-    title: "Example",
-    status: "in-progress",
-    scores: [[null, null, null, null]],
-    players: [
-      {
-        name: "Rebecca",
-        color: "#d3d3d3",
-        id: "123",
-      },
-      {
-        name: "Chris",
-        color: "#7cfc00",
-        id: "456",
-      },
-      {
-        name: "Chris",
-        color: "#7cfc00",
-        id: "789",
-      },
-      {
-        name: "Chris",
-        color: "#7cfc00",
-        id: "1011",
-      },
-    ],
+const createGame = (): Game => ({
+  reversedScoring: true,
+  showInterimResults: true,
+  showGameRounds: true,
+  id: "abc",
+  title: "Example",
+  status: "in-progress",
+  scores: [[null, null, null, null]],
+  players: [
+    {
+      name: "Rebecca",
+      color: "#d3d3d3",
+      id: "123",
+    },
+    {
+      name: "Chris",
+      color: "#7cfc00",
+      id: "456",
+    },
+    {
+      name: "Chris",
+      color: "#7cfc00",
+      id: "789",
+    },
+    {
+      name: "Chris",
+      color: "#7cfc00",
+      id: "1011",
+    },
+  ],
 
-    updatedAt: new Date(),
-    createdAt: new Date(),
-  },
-];
+  updatedAt: new Date(),
+  createdAt: new Date(),
+});
+let games: Game[] = [createGame(), createGame(), createGame()];
 
 const getGames = () => Promise.resolve(games);
 
-export const useGamesQuery = () => {
+export const useGamesQuery = (options?: UseQueryOptions<Game[]>) => {
   return useQuery({
     queryKey: ["useGamesQuery"],
     queryFn: getGames,
+    ...options,
+  });
+};
+
+export const useGameTotalsQuery = (id: string) => {
+  const game = games.find((game) => game.id === id);
+
+  if (!game) return [];
+
+  return game.scores
+    .reduce((acc: number[], row) => {
+      row.forEach((score, index) => {
+        acc[index] = (acc[index] || 0) + (score || 0);
+      });
+      return acc;
+    }, [] as number[])
+    .map((score, i) => {
+      return [score, game.players[i]] as const;
+    })
+    .sort(([a], [b]) => {
+      return game.reversedScoring ? a - b : b - a;
+    });
+};
+
+export const useFinishGameMutation = (id: string) => {
+  const game = games.find((game) => game.id === id);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => {
+      if (game) {
+        game.status = "finished";
+        queryClient.invalidateQueries({ queryKey: ["useGameById", id] });
+      }
+
+      return Promise.resolve(game);
+    },
   });
 };
 

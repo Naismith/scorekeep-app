@@ -8,6 +8,7 @@ export type Player = {
 
 export type NewPlayer = Omit<Player, "id">;
 
+export type GameStatus = "in-progress" | "finished";
 export type Game = {
   id: string;
   title: string;
@@ -15,12 +16,12 @@ export type Game = {
   countOfGameRounds?: number;
   reversedScoring: boolean;
   showInterimResults: boolean;
-  showGameResults: boolean;
+  showGameRounds: boolean;
   players: Player[];
   scores: Score[];
   createdAt: Date;
   updatedAt: Date;
-  status: "in-progress" | "finished";
+  status: GameStatus;
 };
 
 export type NewGame = Omit<
