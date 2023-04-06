@@ -1,6 +1,6 @@
 // Random uuids to pull as I may need it.
 
-const uuids = [
+export const uuids = [
   "3460a123-1de8-41ea-addc-bd5135fb59ec",
   "81e86792-8f5a-49fd-b1df-fca7dcc07d68",
   "2d24d845-d6c2-4253-8078-5e7fc871f2bd",
