@@ -34,67 +34,82 @@ export interface Database {
   }
   public: {
     Tables: {
-      players: {
+      games: {
         Row: {
-          color: string
-          created_at: string | null
-          id: string
-          name: string
-          profile_id: string | null
-        }
-        Insert: {
-          color?: string
-          created_at?: string | null
-          id: string
-          name?: string
-          profile_id?: string | null
-        }
-        Update: {
-          color?: string
-          created_at?: string | null
-          id?: string
-          name?: string
-          profile_id?: string | null
-        }
-      }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          full_name: string | null
-          id: string
-          updated_at: string | null
-          username: string | null
-          website: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id: string
-          updated_at?: string | null
-          username?: string | null
-          website?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id?: string
-          updated_at?: string | null
-          username?: string | null
-          website?: string | null
-        }
-      }
-      temp: {
-        Row: {
+          countOfGameRounds: number | null
           created_at: string | null
           id: number
+          maxScore: number | null
+          reversedScoring: boolean | null
+          scores: Json | null
+          showGameRounds: boolean | null
+          showInterimResults: boolean | null
+          status: string | null
+          title: string | null
+          user_id: string | null
         }
         Insert: {
+          countOfGameRounds?: number | null
           created_at?: string | null
           id?: number
+          maxScore?: number | null
+          reversedScoring?: boolean | null
+          scores?: Json | null
+          showGameRounds?: boolean | null
+          showInterimResults?: boolean | null
+          status?: string | null
+          title?: string | null
+          user_id?: string | null
         }
         Update: {
+          countOfGameRounds?: number | null
           created_at?: string | null
           id?: number
+          maxScore?: number | null
+          reversedScoring?: boolean | null
+          scores?: Json | null
+          showGameRounds?: boolean | null
+          showInterimResults?: boolean | null
+          status?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+      }
+      games_players: {
+        Row: {
+          game: number
+          player: number
+          user_id: string | null
+        }
+        Insert: {
+          game: number
+          player: number
+          user_id?: string | null
+        }
+        Update: {
+          game?: number
+          player?: number
+          user_id?: string | null
+        }
+      }
+      players: {
+        Row: {
+          color: string | null
+          id: number
+          name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          color?: string | null
+          id?: number
+          name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          color?: string | null
+          id?: number
+          name?: string | null
+          user_id?: string | null
         }
       }
     }
@@ -105,7 +120,7 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      game_status: "in-progress" | "finished"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
