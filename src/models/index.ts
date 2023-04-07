@@ -1,12 +1,14 @@
+import { Database } from "./database.types";
+
 export type Score = (number | null)[];
 
-export type Player = {
-  id: string;
-  name: string;
-  color: string;
-};
+type TableRows = keyof Database["public"]["Tables"];
+export type getTableRow<T extends TableRows> =
+  Database["public"]["Tables"][T]["Row"];
 
-export type NewPlayer = Omit<Player, "id">;
+export type Player = getTableRow<"players">;
+
+export type NewPlayer = Omit<Player, "id" | "created_at" | "profile_id">;
 
 export type GameStatus = "in-progress" | "finished";
 export type Game = {

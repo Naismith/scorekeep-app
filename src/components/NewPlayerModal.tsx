@@ -57,6 +57,7 @@ export const NewPlayerModal = ({ open, handleClose }: Props) => {
 
         {colorOptions.map((color, index) => (
           <Radio
+            key={color}
             checked={selectedIndex === index}
             onChange={() => setSelectedIndex(index)}
             value={color}

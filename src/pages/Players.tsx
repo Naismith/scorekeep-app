@@ -1,4 +1,4 @@
-import { usePlayersQuery } from "../hooks/usePlayers";
+import { useDeletePlayerMutation, usePlayersQuery } from "../hooks/usePlayers";
 import {
   AppBar,
   Toolbar,
@@ -10,12 +10,14 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddCircle from "@mui/icons-material/AddCircle";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { NewPlayerModal } from "../components/NewPlayerModal";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const PlayersPage = () => {
   const { data, isSuccess } = usePlayersQuery();
+  const { mutateAsync: deletePlayer } = useDeletePlayerMutation();
   const [showNewPlayer, setShowNewPlayer] = useState(false);
   return (
     <>
@@ -67,7 +69,17 @@ const PlayersPage = () => {
                     backgroundColor: player.color,
                   }}
                 />
-                <h3 style={{ margin: 0 }}>{player.name}</h3>
+                <Typography sx={{ flexGrow: 1 }} variant="h5">
+                  {player.name}
+                </Typography>
+                <IconButton
+                  onClick={() => deletePlayer(player.id)}
+                  edge="start"
+                  color="inherit"
+                  aria-label="delete"
+                >
+                  <DeleteIcon sx={{ fontSize: ".75em" }} />
+                </IconButton>
               </Box>
             ))}
         </Stack>

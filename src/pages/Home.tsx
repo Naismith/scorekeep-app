@@ -7,12 +7,21 @@ import {
   IconButton,
   Typography,
   Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useState } from "react";
+import { useLogout } from "../hooks/useSession";
 
 const Home = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
+  const logout = useLogout();
   return (
     <>
       <AppBar position="sticky">
@@ -36,7 +45,18 @@ const Home = () => {
         open={openDrawer}
         onClose={() => setOpenDrawer(false)}
       >
-        test
+        <Box sx={{ width: 250 }} onClick={() => setOpenDrawer(false)}>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton onClick={logout}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Logout"} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Box>
       </Drawer>
       <Container
         maxWidth="xs"

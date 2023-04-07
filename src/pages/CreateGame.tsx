@@ -151,7 +151,7 @@ const CreateGame = () => {
           <Box flexGrow={1}>
             <List>
               {selectedPlayers.map((player) => (
-                <ListItem>
+                <ListItem key={player.id}>
                   <ListItemAvatar>
                     <Avatar sx={{ bgcolor: player.color }}> </Avatar>
                   </ListItemAvatar>
