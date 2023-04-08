@@ -25,11 +25,7 @@ const SignInPage = () => {
         emailRedirectTo: "localhost:5173",
       },
     });
-
-    console.log(data, error);
   };
-
-  console.log(session);
 
   if (loading) return null;
 
