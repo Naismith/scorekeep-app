@@ -14,7 +14,10 @@ export type getEnum<T extends PossibleEnums> = Enums[T];
 
 export type Player = getTableRow<"players">;
 
-export type NewPlayer = Omit<Player, "id" | "created_at" | "profile_id">;
+export type NewPlayer = Omit<
+  Player,
+  "id" | "created_at" | "profile_id" | "user_id"
+>;
 
 export type GameStatus = getEnum<"game_status">;
 export type Game = Omit<getTableRow<"games">, "scores"> & {

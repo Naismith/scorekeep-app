@@ -51,7 +51,7 @@ export const useGameTotalsQuery = (id: Game["id"]) => {
   return { ...rest, data: totals };
 };
 
-export const useFinishGameMutation = (id: string) => {
+export const useFinishGameMutation = (id: Game["id"]) => {
   const queryClient = useQueryClient();
 
   return useMutation({

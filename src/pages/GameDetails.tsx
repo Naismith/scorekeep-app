@@ -116,11 +116,13 @@ const Grid = styled("div")<{ columns: number; rows: number }>((props) => ({
 const GameDetails = () => {
   const { id = "" } = useParams();
   const [showResultsModal, setShowResultsModal] = useState(false);
-  const { data, isSuccess } = useGameByIdQuery(id);
+  const { data, isSuccess } = useGameByIdQuery(Number(id));
   const lastRowFirstCellRef = useRef<HTMLInputElement>(null);
-  const { mutateAsync: createRow, lastSuccess } = useCreateNewRowMutation(id);
-  const { mutateAsync: updateRow } = useUpdateRowMutation(id);
-  const { mutateAsync: finishGame } = useFinishGameMutation(id);
+  const { mutateAsync: createRow, lastSuccess } = useCreateNewRowMutation(
+    Number(id)
+  );
+  const { mutateAsync: updateRow } = useUpdateRowMutation(Number(id));
+  const { mutateAsync: finishGame } = useFinishGameMutation(Number(id));
 
   useEffect(() => {
     if (data?.status === "finished") {

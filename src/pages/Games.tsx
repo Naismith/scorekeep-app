@@ -73,7 +73,7 @@ const PlayersPage = () => {
           </IconButton>
           <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
             <MenuItem onClick={() => setFilter(null)}>All games</MenuItem>
-            <MenuItem onClick={() => setFilter("in-progress")}>
+            <MenuItem onClick={() => setFilter("inprogress")}>
               In progress games
             </MenuItem>
             <MenuItem onClick={() => setFilter("finished")}>
