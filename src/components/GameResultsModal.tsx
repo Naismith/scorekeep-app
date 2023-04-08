@@ -17,7 +17,7 @@ type Props = {
   game: Game;
 };
 export const GameResultsModal = ({ open, onClose, game }: Props) => {
-  const totals = useGameTotalsQuery(game.id);
+  const { data: totals } = useGameTotalsQuery(game.id);
 
   let scoreRef: Record<string, number> = {};
 

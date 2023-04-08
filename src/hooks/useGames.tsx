@@ -5,109 +5,109 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { NewGame, Game, Score } from "../models";
-import { v4 as uuid } from "uuid";
-import { useState } from "react";
-
-const createGame = (): Game => ({
-  reversedScoring: true,
-  showInterimResults: true,
-  showGameRounds: true,
-  id: "abc",
-  title: "Example",
-  status: "in-progress",
-  scores: [[null, null, null, null]],
-  players: [
-    {
-      name: "Rebecca",
-      color: "#d3d3d3",
-      id: "123",
-    },
-    {
-      name: "Chris",
-      color: "#7cfc00",
-      id: "456",
-    },
-    {
-      name: "Chris",
-      color: "#7cfc00",
-      id: "789",
-    },
-    {
-      name: "Chris",
-      color: "#7cfc00",
-      id: "1011",
-    },
-  ],
-
-  updatedAt: new Date(),
-  createdAt: new Date(),
-});
-let games: Game[] = [createGame(), createGame(), createGame()];
-
-const getGames = () => Promise.resolve(games);
+import { Game, Score, Player, GameWithPlayers, NewGame } from "../models";
+import { useMemo, useState } from "react";
+import { supabase } from "../supabaseClient";
+import { useSession } from "./useSession";
 
 export const useGamesQuery = (options?: UseQueryOptions<Game[]>) => {
   return useQuery({
     queryKey: ["useGamesQuery"],
-    queryFn: getGames,
-    ...options,
-  });
-};
+    queryFn: async () => {
+      const { data, error } = await supabase.from("games").select(`
+        *, 
+        players ( 
+          * 
+        )
+      `);
 
-export const useGameTotalsQuery = (id: string) => {
-  const game = games.find((game) => game.id === id);
+      if (error) throw error;
 
-  if (!game) return [];
-
-  return game.scores
-    .reduce((acc: number[], row) => {
-      row.forEach((score, index) => {
-        acc[index] = (acc[index] || 0) + (score || 0);
-      });
-      return acc;
-    }, [] as number[])
-    .map((score, i) => {
-      return [score, game.players[i]] as const;
-    })
-    .sort(([a], [b]) => {
-      return game.reversedScoring ? a - b : b - a;
-    });
-};
-
-export const useFinishGameMutation = (id: string) => {
-  const game = games.find((game) => game.id === id);
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => {
-      if (game) {
-        game.status = "finished";
-        queryClient.invalidateQueries({ queryKey: ["useGameById", id] });
-      }
-
-      return Promise.resolve(game);
+      return data as Game[];
     },
   });
 };
 
-export const useGameByIdQuery = (id: string, options?: UseQueryOptions) => {
-  const game = games.find((game) => game.id === id);
+export const useGameTotalsQuery = (id: Game["id"]) => {
+  const { data: game, ...rest } = useGameByIdQuery(id);
 
-  return useQuery({
-    queryKey: ["useGameById", id],
-    queryFn: () => Promise.resolve(game),
+  const totals = useMemo(() => {
+    if (!game) return [];
+    return game.scores
+      .reduce((acc: number[], row) => {
+        row.forEach((score, index) => {
+          acc[index] = (acc[index] || 0) + (score || 0);
+        });
+        return acc;
+      }, [] as number[])
+      .map((score, i) => {
+        return [score, game.players[i]] as const;
+      })
+      .sort(([a], [b]) => {
+        return game.reversedScoring ? a - b : b - a;
+      });
+  }, [game]);
+
+  return { ...rest, data: totals };
+};
+
+export const useFinishGameMutation = (id: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      await supabase.from("games").update({ status: "finished" }).match({ id });
+      queryClient.invalidateQueries({ queryKey: ["useGameById", id] });
+
+      return;
+    },
   });
 };
 
-export const useUpdateRowMutation = (id: string) => {
+export const useGameByIdQuery = (
+  id: Game["id"],
+  options?: UseQueryOptions<GameWithPlayers>
+) => {
+  return useQuery({
+    queryKey: ["useGameById", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("games")
+        .select(
+          `
+        *,
+        players ( 
+          * 
+        )
+      `
+        )
+        .match({ id })
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+
+      return data as GameWithPlayers;
+    },
+    ...options,
+  });
+};
+
+export const useUpdateRowMutation = (id: Game["id"]) => {
   const queryClient = useQueryClient();
-  const gameIndex = games.findIndex((game) => game.id === id);
+  const { data: game } = useGameByIdQuery(id);
 
   return useMutation({
-    mutationFn: ({ rowIndex, row }: { rowIndex: number; row: Score }) => {
-      if (gameIndex >= 0) {
-        games[gameIndex].scores[rowIndex] = row;
+    mutationFn: async ({ rowIndex, row }: { rowIndex: number; row: Score }) => {
+      if (game) {
+        const currentScore = game.scores;
+        currentScore[rowIndex] = row;
+
+        const { data } = await supabase
+          .from("games")
+          // @ts-ignore
+          .update({ scores: currentScore })
+          .match({ id });
       }
 
       queryClient.invalidateQueries({ queryKey: ["useGameById", id] });
@@ -117,22 +117,36 @@ export const useUpdateRowMutation = (id: string) => {
   });
 };
 
+const toArray = <T,>(val: T | undefined): T[] => {
+  if (val === undefined) return [];
+  return Array.isArray(val) ? val : [val];
+};
+
 export const useCreateNewRowMutation = (
-  id: string,
+  id: Game["id"],
   options?: UseMutationOptions
 ) => {
   const [lastSuccess, setLastSuccess] = useState(0);
   const queryClient = useQueryClient();
-  const gameIndex = games.findIndex((game) => game.id === id);
+
+  const { data: game } = useGameByIdQuery(id);
 
   const result = useMutation({
-    mutationFn: () => {
-      if (gameIndex >= 0) {
-        games[gameIndex].scores.push(games[gameIndex].players.map(() => null));
+    mutationFn: async () => {
+      if (game) {
+        const newRow = toArray(game.players).map(() => null);
+        const { data } = await supabase
+          .from("games")
+          // @ts-ignore
+          .update({ scores: [...game.scores, newRow] })
+          .match({ id: id });
 
-        queryClient.invalidateQueries({ queryKey: ["useGameById", id] });
+        queryClient.setQueriesData<Game>(["useGameById", id], (game) => {
+          return game ? { ...game, scores: [...game.scores, newRow] } : game;
+        });
       }
-      return Promise.resolve();
+
+      return;
     },
     ...options,
     onSuccess: (...args) => {
@@ -148,26 +162,45 @@ export const useCreateNewRowMutation = (
 
 export const useCreateGameMutation = () => {
   const queryClient = useQueryClient();
+  const { session } = useSession();
 
   return useMutation({
-    mutationFn: (partialGame: NewGame) => {
-      const now = new Date();
-      console.log(partialGame);
-      const newGame: Game = {
-        ...partialGame,
-        id: uuid(),
-        status: "in-progress",
-        scores: [partialGame.players.map(() => null)],
-        createdAt: now,
-        updatedAt: now,
-      };
-      games.push(newGame);
+    mutationFn: async ({
+      game,
+      players,
+    }: {
+      game: NewGame;
+      players: Player[];
+    }) => {
+      const newGame = {
+        ...game,
+        user_id: session?.user.id || null,
+        status: "inprogress",
+        scores: [players.map(() => null)],
+        created_at: new Date().toISOString(),
+      } as Game;
 
-      queryClient.invalidateQueries({
-        queryKey: ["useGamesQuery"],
-      });
+      const { data: createdGame, error } = await supabase
+        .from("games")
+        .insert(newGame)
+        .select()
+        .limit(1)
+        .single();
 
-      return Promise.resolve(newGame);
+      if (error) throw error;
+
+      const { data: createdPlayers } = await supabase
+        .from("games_players")
+        .insert(
+          players.map((player) => ({
+            user_id: session?.user.id,
+            player: player.id,
+            game: createdGame.id,
+          }))
+        )
+        .select();
+
+      return createdGame;
     },
   });
 };

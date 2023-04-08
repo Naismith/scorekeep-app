@@ -29,6 +29,8 @@ const SignInPage = () => {
     console.log(data, error);
   };
 
+  console.log(session);
+
   if (loading) return null;
 
   if (session) {

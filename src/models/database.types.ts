@@ -44,7 +44,7 @@ export interface Database {
           scores: Json | null
           showGameRounds: boolean | null
           showInterimResults: boolean | null
-          status: string | null
+          status: Database["public"]["Enums"]["game_status"] | null
           title: string | null
           user_id: string | null
         }
@@ -57,7 +57,7 @@ export interface Database {
           scores?: Json | null
           showGameRounds?: boolean | null
           showInterimResults?: boolean | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["game_status"] | null
           title?: string | null
           user_id?: string | null
         }
@@ -70,7 +70,7 @@ export interface Database {
           scores?: Json | null
           showGameRounds?: boolean | null
           showInterimResults?: boolean | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["game_status"] | null
           title?: string | null
           user_id?: string | null
         }
@@ -94,21 +94,21 @@ export interface Database {
       }
       players: {
         Row: {
-          color: string | null
+          color: string
           id: number
-          name: string | null
+          name: string
           user_id: string | null
         }
         Insert: {
-          color?: string | null
+          color: string
           id?: number
-          name?: string | null
+          name: string
           user_id?: string | null
         }
         Update: {
-          color?: string | null
+          color?: string
           id?: number
-          name?: string | null
+          name?: string
           user_id?: string | null
         }
       }
@@ -120,7 +120,7 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      game_status: "inprogress" | "finished"
     }
     CompositeTypes: {
       [_ in never]: never

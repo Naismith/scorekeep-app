@@ -7,3 +7,11 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 console.log("SupabaseURL", supabaseUrl);
+
+declare global {
+  interface Window {
+    supabase: typeof supabase;
+  }
+}
+
+window.supabase = supabase;

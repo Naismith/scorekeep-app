@@ -1,6 +1,5 @@
 import { Player, NewPlayer } from "../models";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { v4 as uuid } from "uuid";
 import { supabase } from "../supabaseClient";
 import { useSession } from "./useSession";
 
@@ -8,7 +7,7 @@ export const usePlayersQuery = () => {
   return useQuery<Player[]>({
     queryKey: ["usePlayers"],
     queryFn: async () => {
-      const { data } = await supabase.from("players").select();
+      const { data } = await supabase.from("players").select("*");
 
       return data || [];
     },
@@ -41,8 +40,7 @@ export const useNewPlayerMutation = () => {
     mutationFn: async (partialPlayer: NewPlayer) => {
       const player = {
         ...partialPlayer,
-        id: uuid(),
-        profile_id: session?.user.id,
+        user_id: session?.user.id,
       } as Player;
 
       const { data } = await supabase.from("players").insert(player).select();

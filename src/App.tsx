@@ -17,7 +17,9 @@ import SignInPage from "./pages/SignIn";
 import { useGlobalSessionEffect } from "./hooks/useSession";
 
 const queryClient = new QueryClient();
-const theme = createTheme({ palette: { mode: "dark" } });
+const theme = createTheme({
+  palette: { mode: "dark" },
+});
 
 function App() {
   const session = useGlobalSessionEffect();

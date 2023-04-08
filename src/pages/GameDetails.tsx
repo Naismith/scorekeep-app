@@ -157,7 +157,7 @@ const GameDetails = () => {
     const maxScore = data.maxScore;
     const maxRoundsReached = data.countOfGameRounds === currentRounds;
     const maxScoreReached =
-      maxScore !== undefined && totals.some((score) => score < maxScore);
+      maxScore !== null && totals.some((score) => score < maxScore);
 
     if (maxRoundsReached || maxScoreReached) {
       await finishGame();
@@ -201,7 +201,7 @@ const GameDetails = () => {
               Results
             </Button>
           )}
-          {data.status === "in-progress" && (
+          {data.status === "inprogress" && (
             <Button
               sx={{ color: "white" }}
               onClick={() => finishGame()}

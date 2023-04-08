@@ -2,31 +2,25 @@ import { Database } from "./database.types";
 
 export type Score = (number | null)[];
 
-type TableRows = keyof Database["public"]["Tables"];
-export type getTableRow<T extends TableRows> =
-  Database["public"]["Tables"][T]["Row"];
+type DB_PUBLIC = Database["public"];
+type DB_PUBLIC_TABLES = DB_PUBLIC["Tables"];
+
+type TableRows = keyof DB_PUBLIC_TABLES;
+type Enums = DB_PUBLIC["Enums"];
+type PossibleEnums = keyof DB_PUBLIC["Enums"];
+
+export type getTableRow<T extends TableRows> = DB_PUBLIC_TABLES[T]["Row"];
+export type getEnum<T extends PossibleEnums> = Enums[T];
 
 export type Player = getTableRow<"players">;
 
 export type NewPlayer = Omit<Player, "id" | "created_at" | "profile_id">;
 
-export type GameStatus = "in-progress" | "finished";
-export type Game = {
-  id: string;
-  title: string;
-  maxScore?: number;
-  countOfGameRounds?: number;
-  reversedScoring: boolean;
-  showInterimResults: boolean;
-  showGameRounds: boolean;
-  players: Player[];
+export type GameStatus = getEnum<"game_status">;
+export type Game = Omit<getTableRow<"games">, "scores"> & {
   scores: Score[];
-  createdAt: Date;
-  updatedAt: Date;
-  status: GameStatus;
 };
 
-export type NewGame = Omit<
-  Game,
-  "id" | "scores" | "createdAt" | "updatedAt" | "status"
->;
+export type GameWithPlayers = Game & { players: Player[] };
+
+export type NewGame = Omit<Game, "id" | "scores" | "created_at" | "status">;

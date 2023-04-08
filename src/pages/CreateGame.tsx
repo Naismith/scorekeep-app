@@ -232,14 +232,15 @@ const CreateGame = () => {
             if (isStep(StepEnum.Players)) {
               const values = getValues();
               const newGame = await mutateAsync({
-                title: values.title,
-                reversedScoring: values.reversedScoring,
-                showGameRounds: values.showGameRounds,
-                showInterimResults: values.showInterimResults,
-                countOfGameRounds:
-                  Number(values.countOfGameRounds) || undefined,
-                maxScore: Number(values.maxScore) || undefined,
-
+                game: {
+                  title: values.title,
+                  reversedScoring: values.reversedScoring,
+                  showGameRounds: values.showGameRounds,
+                  showInterimResults: values.showInterimResults,
+                  countOfGameRounds: Number(values.countOfGameRounds) || null,
+                  maxScore: Number(values.maxScore) || null,
+                  user_id: "",
+                },
                 players: selectedPlayers,
               });
               setSelectedPlayers([]);
