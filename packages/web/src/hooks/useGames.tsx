@@ -187,7 +187,7 @@ export const useCreateGameMutation = () => {
         .limit(1)
         .single();
 
-      if (error) throw error;
+      if (error || !createdGame) throw error;
 
       const { data: createdPlayers } = await supabase
         .from("games_players")

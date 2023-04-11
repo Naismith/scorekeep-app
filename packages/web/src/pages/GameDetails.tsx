@@ -75,7 +75,7 @@ const ScoreRow = ({
           }}
           inputMode="numeric"
           pattern="[0-9]*"
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const newVal = Number(e.target.value);
             const clone = [...scores];
             clone[i] = newVal;

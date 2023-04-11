@@ -1,3 +1,4 @@
+import { Auth } from "@supabase/auth-ui-react";
 import { Link, Outlet } from "react-router-dom";
 import {
   AppBar,
@@ -9,6 +10,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
@@ -42,7 +44,14 @@ const SignInPage = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Container
+      <Container>
+        <Auth
+          supabaseClient={supabase}
+          appearance={{ theme: ThemeSupa }}
+          theme="dark"
+        />
+      </Container>
+      {/* <Container
         maxWidth="xs"
         sx={{
           height: "100%",
@@ -63,7 +72,7 @@ const SignInPage = () => {
         <Button onClick={onClickLogin} variant="contained">
           Login
         </Button>
-      </Container>
+      </Container> */}
     </>
   );
 };

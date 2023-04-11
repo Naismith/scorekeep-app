@@ -244,7 +244,7 @@ const CreateGame = () => {
                 players: selectedPlayers,
               });
               setSelectedPlayers([]);
-              navigate(`/game/${newGame.id}`);
+              navigate(`/game/${newGame?.id || ""}`);
             }
           }}
           edge="start"

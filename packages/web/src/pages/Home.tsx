@@ -18,6 +18,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useState } from "react";
 import { useLogout } from "../hooks/useSession";
+import { supabase } from "../supabaseClient";
 
 const Home = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -48,7 +49,7 @@ const Home = () => {
         <Box sx={{ width: 250 }} onClick={() => setOpenDrawer(false)}>
           <List>
             <ListItem disablePadding>
-              <ListItemButton onClick={logout}>
+              <ListItemButton onClick={() => supabase.auth.signOut()}>
                 <ListItemIcon>
                   <LogoutIcon />
                 </ListItemIcon>

@@ -54,6 +54,7 @@ const PlayersPage = () => {
       <Container maxWidth="xs">
         <Stack spacing={2}>
           {isSuccess &&
+            data &&
             data.map((player) => (
               <Box
                 key={player.id}

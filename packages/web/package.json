@@ -1,16 +1,14 @@
 {
-  "name": "scorekeep-app",
+  "name": "scorekeep-app-web",
   "private": true,
   "version": "0.0.0",
   "repository": "git@github.com:Naismith/scorekeep-app.git",
   "author": "Chris Naismith <christophernaismith@gmail.com>",
   "type": "module",
-  "workspaces": [
-    "packages/web"
-  ],
   "scripts": {
-    "supabase:start": "supabase start",
-    "supabase:tsgen": "supabase gen types typescript --local > src/models/database.types.ts"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
