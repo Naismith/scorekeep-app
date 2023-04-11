@@ -1,6 +1,5 @@
 import * as SecureStore from "expo-secure-store";
-import { createClient } from '@supabase/supabase-js'
-
+import { createClient } from "@supabase/supabase-js";
 
 const ExpoSecureStoreAdapter = {
   getItem: (key: string) => {
@@ -14,8 +13,8 @@ const ExpoSecureStoreAdapter = {
   },
 };
 
-const supabaseUrl = YOUR_REACT_NATIVE_SUPABASE_URL
-const supabaseAnonKey = YOUR_REACT_NATIVE_SUPABASE_ANON_KEY
+const supabaseUrl = ""; // TODO
+const supabaseAnonKey = ""; // TODO
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -24,4 +23,4 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: false,
   },
-})
+});
