@@ -6,7 +6,8 @@
   "author": "Chris Naismith <christophernaismith@gmail.com>",
   "type": "module",
   "workspaces": [
-    "packages/web"
+    "packages/web",
+    "packages/native-mobile"
   ],
   "scripts": {
     "supabase:start": "supabase start",
